@@ -92,7 +92,7 @@ fn build_ui(application: &gtk::Application, chart_type: ChartType) {
 
 // Create GUI window and call Cairo drawing function
 pub(in chart_builder) fn build_window(chart_type: ChartType) {
-    let application = gtk::Application::new("com.github.rustlib_app",
+    let application = gtk::Application::new(Some("com.github.rustlib_app"),
                                             gio::ApplicationFlags::empty())
                                        .expect("Initialization failed...");
 

@@ -54,9 +54,9 @@ use self::gtk::prelude::*;
 use self::gtk::DrawingArea;
 
 use self::cairo::Context;
-use self::cairo::enums::{FontSlant, FontWeight};
+use self::cairo::{FontSlant, FontWeight};
 #[allow(unused_imports)]
-use self::cairo::MatrixTrait;
+use self::cairo::Matrix;
 
 /*
  * Defining general Chart component structures and thier constructors.
