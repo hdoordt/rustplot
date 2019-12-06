@@ -1,4 +1,3 @@
-
 /// Structure allowing manipulation of chart axis.
 #[derive(Clone)]
 pub struct AxisProp {
@@ -11,7 +10,12 @@ pub struct AxisProp {
 }
 
 impl AxisProp {
-    pub(in chart_builder) fn new(new_x_axis_bounds: (f64, f64), new_y_axis_bounds: (f64, f64), new_x_axis_scale: f64, new_y_axis_scale: f64) -> AxisProp {
+    pub(in chart_builder) fn new(
+        new_x_axis_bounds: (f64, f64),
+        new_y_axis_bounds: (f64, f64),
+        new_x_axis_scale: f64,
+        new_y_axis_scale: f64,
+    ) -> AxisProp {
         AxisProp {
             x_axis_bounds: new_x_axis_bounds,
             y_axis_bounds: new_y_axis_bounds,
@@ -104,7 +108,7 @@ impl AxisProp {
 }
 
 // takes a sorted f64 vector
-pub(in chart_builder) fn percentile(data: &Vec<f64>, percentile: f64) -> f64{
+pub(in chart_builder) fn percentile(data: &Vec<f64>, percentile: f64) -> f64 {
     let len = data.len();
     let n = ((len - 1) as f64) * percentile + 1.0;
     // Another method: double n = (N + 1) * excelPercentile;
@@ -113,9 +117,9 @@ pub(in chart_builder) fn percentile(data: &Vec<f64>, percentile: f64) -> f64{
     } else if n == (len as f64) {
         data[len - 1]
     } else {
-         let k: usize = n.floor() as usize;
-         let d = n - (k as f64);
-         data[k - 1] + d * (data[k] - data[k - 1])
+        let k: usize = n.floor() as usize;
+        let d = n - (k as f64);
+        data[k - 1] + d * (data[k] - data[k - 1])
     }
 }
 
@@ -125,7 +129,7 @@ fn check_outliers(data: &Vec<Vec<f64>>, x_axis: bool) {
 
     for i in 0..data.len() {
         // Sort data for determing percentile
-        let mut sorted_data =  data[i].clone();
+        let mut sorted_data = data[i].clone();
         sorted_data.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
 
         // Lower quartile is the (n + 1) ÷ 4 th value.
@@ -171,17 +175,29 @@ fn calc_scale(min: f64, max: f64) -> f64 {
     scale
 }
 
-pub(in chart_builder) fn calc_axis_props(data: &Vec<Vec<f64>>, start_zero: bool, x_axis: bool) -> ((f64, f64), f64) {
+pub(in chart_builder) fn calc_axis_props(
+    data: &Vec<Vec<f64>>,
+    start_zero: bool,
+    x_axis: bool,
+) -> ((f64, f64), f64) {
     check_outliers(data, x_axis);
     calc_data_range(data, start_zero, 0.8, 0.08, 0.2)
 }
 
-
-pub(in chart_builder) fn calc_data_range(data: &Vec<Vec<f64>>, start_zero: bool, data_fill: f64, min_delim_scale: f64, max_delim_scale: f64) -> ((f64, f64), f64) {
-
+pub(in chart_builder) fn calc_data_range(
+    data: &Vec<Vec<f64>>,
+    start_zero: bool,
+    data_fill: f64,
+    min_delim_scale: f64,
+    max_delim_scale: f64,
+) -> ((f64, f64), f64) {
     // Calculate axis bounds
-    let min: f64 = data.iter().fold(-0./0., |vec_cur_min, ref x| vec_cur_min.min(x.iter().fold(-0./0., |cur_min, &x| cur_min.min(x))));
-    let max: f64 = data.iter().fold(0./0., |vec_cur_max, ref x| vec_cur_max.max(x.iter().fold(0./0., |cur_max, &x| cur_max.max(x))));
+    let min: f64 = data.iter().fold(-0. / 0., |vec_cur_min, ref x| {
+        vec_cur_min.min(x.iter().fold(-0. / 0., |cur_min, &x| cur_min.min(x)))
+    });
+    let max: f64 = data.iter().fold(0. / 0., |vec_cur_max, ref x| {
+        vec_cur_max.max(x.iter().fold(0. / 0., |cur_max, &x| cur_max.max(x)))
+    });
 
     let mut axis_min: f64;
     let mut axis_max: f64;
@@ -211,12 +227,18 @@ pub(in chart_builder) fn calc_data_range(data: &Vec<Vec<f64>>, start_zero: bool,
             axis_min = (min / mag).floor() * mag;
             axis_max = (max / mag).ceil() * mag;
             // axis must be filled with 80% of data
-            if data_range / (axis_max - axis_min) > data_fill { break; }
+            if data_range / (axis_max - axis_min) > data_fill {
+                break;
+            }
             exp -= 1.0;
         }
 
-        if axis_min > 0.0 && start_zero { axis_min = 0.0; }
-        if axis_max < 0.0 && start_zero { axis_max = 0.0; }
+        if axis_min > 0.0 && start_zero {
+            axis_min = 0.0;
+        }
+        if axis_max < 0.0 && start_zero {
+            axis_max = 0.0;
+        }
     }
     // Calculate scale
     axis_min = format!("{:.*}", 15, axis_min).parse::<f64>().unwrap();
@@ -240,8 +262,12 @@ pub(in chart_builder) fn calc_data_range(data: &Vec<Vec<f64>>, start_zero: bool,
             mod_check_interval = interval * interval_mag_inverse;
         }
         // removes accuracy of check but required due to inaccuracies due to using floating point.
-        mod_check_range = format!("{:.*}", 12, mod_check_range).parse::<f64>().unwrap();
-        mod_check_interval = format!("{:.*}", 12, mod_check_interval).parse::<f64>().unwrap();
+        mod_check_range = format!("{:.*}", 12, mod_check_range)
+            .parse::<f64>()
+            .unwrap();
+        mod_check_interval = format!("{:.*}", 12, mod_check_interval)
+            .parse::<f64>()
+            .unwrap();
         mod_check_range % mod_check_interval != 0.0
     }
 
@@ -256,7 +282,8 @@ pub(in chart_builder) fn calc_data_range(data: &Vec<Vec<f64>>, start_zero: bool,
         scale = scale * 2.0;
         interval = scale * axis_range;
 
-        if decimal_mod(axis_range, interval) { // axis_range % interval != 0.0
+        if decimal_mod(axis_range, interval) {
+            // axis_range % interval != 0.0
             let half_interval = interval / 2.0;
             if axis_min == 0.0 || (axis_min > 0.0 && (axis_min - half_interval) < 0.0) {
                 axis_max += half_interval;

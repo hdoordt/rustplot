@@ -1,6 +1,5 @@
 //!
 
-
 use chart_builder::charts::*;
 
 /// Structure used for storing chart related data and the drawing of an XY Scatter Plot.
@@ -23,7 +22,11 @@ impl XYScatterPlot {
     /// ```new_data_x``` is the number data placed on the x-axis of the chart, specifying horizontal positions of marks.
     ///
     /// ```new_data_y``` is the number data placed on the y-axis of the chart, specifying vertical positions of marks, with indexes corresponding to the same index in new_data_x.
-    pub fn new(chart_title: String, new_data_x: Vec<Vec<f64>>, new_data_y: Vec<Vec<f64>>) -> XYScatterPlot {
+    pub fn new(
+        chart_title: String,
+        new_data_x: Vec<Vec<f64>>,
+        new_data_y: Vec<Vec<f64>>,
+    ) -> XYScatterPlot {
         let x_axis_props = calc_axis_props(&new_data_x, false, true);
         let x_axis_bounds = x_axis_props.0;
         let x_axis_scale = x_axis_props.1;
@@ -32,11 +35,17 @@ impl XYScatterPlot {
         let y_axis_bounds = y_axis_props.0;
         let y_axis_scale = y_axis_props.1;
 
-        let axis_type: AxisType =
-            if (x_axis_bounds.0 < 0.0 && x_axis_bounds.1 > 0.0) && (y_axis_bounds.0 < 0.0 && y_axis_bounds.1 > 0.0) { AxisType::Full }
-            else if x_axis_bounds.0 < 0.0 && x_axis_bounds.1 > 0.0 { AxisType::DoubleHorizontal }
-            else if y_axis_bounds.0 < 0.0 && y_axis_bounds.1 > 0.0 { AxisType::DoubleVertical }
-            else { AxisType::Single };
+        let axis_type: AxisType = if (x_axis_bounds.0 < 0.0 && x_axis_bounds.1 > 0.0)
+            && (y_axis_bounds.0 < 0.0 && y_axis_bounds.1 > 0.0)
+        {
+            AxisType::Full
+        } else if x_axis_bounds.0 < 0.0 && x_axis_bounds.1 > 0.0 {
+            AxisType::DoubleHorizontal
+        } else if y_axis_bounds.0 < 0.0 && y_axis_bounds.1 > 0.0 {
+            AxisType::DoubleVertical
+        } else {
+            AxisType::Single
+        };
 
         XYScatterPlot {
             data_x: new_data_x,
@@ -52,7 +61,7 @@ impl XYScatterPlot {
     pub fn set_best_fit_line(&mut self, best_fit_line: bool) {
         self.best_fit_line = best_fit_line;
     }
-    pub(in chart_builder) fn draw_chart(&self, drawing_area: &DrawingArea) {
+    pub fn draw_chart(&self, drawing_area: &DrawingArea) {
         let data_x = self.data_x.clone();
         let data_y = self.data_y.clone();
         let legend_values = self.chart_prop.legend_values.clone();
@@ -77,7 +86,11 @@ impl XYScatterPlot {
         let mut screen_size = self.chart_prop.screen_size;
         let show_legend = self.chart_prop.show_legend;
         let legend_size = (screen_size.0 * 0.30).ceil();
-        screen_size.0 = if show_legend == false { screen_size.0 } else { screen_size.0 + legend_size };
+        screen_size.0 = if show_legend == false {
+            screen_size.0
+        } else {
+            screen_size.0 + legend_size
+        };
 
         let mut h_scale = screen_size.1 / screen_size.0;
         let mut v_scale = screen_size.0 / screen_size.1;
@@ -90,7 +103,7 @@ impl XYScatterPlot {
         }
 
         // Scaling used dependant use of a legend
-        let scalings: (f64, f64, f64, f64 ,f64, f64);
+        let scalings: (f64, f64, f64, f64, f64, f64);
         if show_legend == true {
             scalings = get_legend_scale(screen_size, legend_size);
         } else {
@@ -152,8 +165,12 @@ impl XYScatterPlot {
                 for i in 0..data_x[j].len() {
                     let x_val = data_x[j][i];
                     let y_val = data_y[j][i];
-                    let x = _left_bound + (get_percentage_in_bounds(x_val, x_axis_min, x_axis_max) * _horizontal_scaling);
-                    let y = _lower_bound - (get_percentage_in_bounds(y_val, y_axis_min, y_axis_max) * _vertical_scaling);
+                    let x = _left_bound
+                        + (get_percentage_in_bounds(x_val, x_axis_min, x_axis_max)
+                            * _horizontal_scaling);
+                    let y = _lower_bound
+                        - (get_percentage_in_bounds(y_val, y_axis_min, y_axis_max)
+                            * _vertical_scaling);
 
                     // draw mark (round) at (x,y)
                     cr.save();
@@ -173,11 +190,20 @@ impl XYScatterPlot {
             // Draw line of best fit
             if best_fit_line == true {
                 for i in 0..m.len() {
-
-                    let mut start_x_val = get_percentage_in_bounds((y_axis_min - c[i]) / m[i], x_axis_min, x_axis_max);
-                    let mut start_y_val = get_percentage_in_bounds(m[i] * x_axis_min + c[i], y_axis_min, y_axis_max);
-                    let mut end_x_val = get_percentage_in_bounds((y_axis_max - c[i]) / m[i], x_axis_min, x_axis_max);
-                    let mut end_y_val = get_percentage_in_bounds(m[i] * x_axis_max + c[i], y_axis_min, y_axis_max);
+                    let mut start_x_val = get_percentage_in_bounds(
+                        (y_axis_min - c[i]) / m[i],
+                        x_axis_min,
+                        x_axis_max,
+                    );
+                    let mut start_y_val =
+                        get_percentage_in_bounds(m[i] * x_axis_min + c[i], y_axis_min, y_axis_max);
+                    let mut end_x_val = get_percentage_in_bounds(
+                        (y_axis_max - c[i]) / m[i],
+                        x_axis_min,
+                        x_axis_max,
+                    );
+                    let mut end_y_val =
+                        get_percentage_in_bounds(m[i] * x_axis_max + c[i], y_axis_min, y_axis_max);
 
                     if start_x_val < 0.0 {
                         start_x_val = 0.0;
@@ -196,7 +222,7 @@ impl XYScatterPlot {
                     let start_y;
                     let end_x;
                     let end_y;
-                    start_x = _left_bound - (start_x_val * _horizontal_scaling);;
+                    start_x = _left_bound - (start_x_val * _horizontal_scaling);
                     start_y = _lower_bound - (start_y_val * _vertical_scaling);
                     end_x = _left_bound + (end_x_val * _horizontal_scaling);
                     end_y = _lower_bound - (end_y_val * _vertical_scaling);
@@ -205,9 +231,11 @@ impl XYScatterPlot {
                     cr.set_line_width(0.002);
                     let x_len = (end_x - start_x).abs();
                     let y_len = (end_y - start_y).abs();
-                    cr.set_line_width(0.002 *
-                        (((x_len/y_len).atan() / (PI / 2.0) * v_scale) +
-                        ((y_len/x_len).atan() / (PI / 2.0) * h_scale)));
+                    cr.set_line_width(
+                        0.002
+                            * (((x_len / y_len).atan() / (PI / 2.0) * v_scale)
+                                + ((y_len / x_len).atan() / (PI / 2.0) * h_scale)),
+                    );
                     set_nth_colour(cr, i);
                     let dash_array = [0.03, 0.01];
                     cr.set_dash(&dash_array, 1.0);
@@ -220,15 +248,36 @@ impl XYScatterPlot {
             }
 
             // Chart Title
-            draw_title(cr, _left_bound, _upper_bound, h_scale, v_scale, &chart_title);
+            draw_title(
+                cr,
+                _left_bound,
+                _upper_bound,
+                h_scale,
+                v_scale,
+                &chart_title,
+            );
 
             // Draw Axis
-            draw_x_axis_con(cr, scalings,
-                x_axis_min, x_axis_max, x_axis_scale, calc_zero_intercept(y_axis_min, y_axis_max), &x_axis_title,
-                screen_size);
-            draw_y_axis_con(cr, scalings,
-                y_axis_min, y_axis_max, y_axis_scale, calc_zero_intercept(x_axis_min, x_axis_max), &y_axis_title,
-                screen_size);
+            draw_x_axis_con(
+                cr,
+                scalings,
+                x_axis_min,
+                x_axis_max,
+                x_axis_scale,
+                calc_zero_intercept(y_axis_min, y_axis_max),
+                &x_axis_title,
+                screen_size,
+            );
+            draw_y_axis_con(
+                cr,
+                scalings,
+                y_axis_min,
+                y_axis_max,
+                y_axis_scale,
+                calc_zero_intercept(x_axis_min, x_axis_max),
+                &y_axis_title,
+                screen_size,
+            );
 
             // Draw legend if chosen
             if show_legend == true {
@@ -238,7 +287,9 @@ impl XYScatterPlot {
             Inhibit(false)
         });
     }
-    pub(in chart_builder) fn get_chart_prop(&self) -> ChartProp { self.chart_prop.clone() }
+    pub(in chart_builder) fn get_chart_prop(&self) -> ChartProp {
+        self.chart_prop.clone()
+    }
 }
 
 impl Chart for XYScatterPlot {

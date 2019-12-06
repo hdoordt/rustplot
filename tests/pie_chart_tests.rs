@@ -1,8 +1,8 @@
 extern crate rustplot;
 
-use rustplot::data_parser;
 use rustplot::chart_builder;
 use rustplot::chart_builder::Chart;
+use rustplot::data_parser;
 
 #[test]
 fn pie_chart_tests() {

@@ -1,6 +1,5 @@
 //!
 
-
 use chart_builder::charts::*;
 
 /// Structure used for storing chart related data and the drawing of an Pie Chart.
@@ -27,7 +26,7 @@ impl PieChart {
             chart_prop: ChartProp::new(chart_title, &axis_type),
         }
     }
-    pub(in chart_builder) fn draw_chart(&self, drawing_area: &DrawingArea) {
+    pub fn draw_chart(&self, drawing_area: &DrawingArea) {
         let data = self.data.clone();
         let legend_values = self.chart_prop.legend_values.clone();
 
@@ -36,7 +35,11 @@ impl PieChart {
         let mut screen_size = self.chart_prop.screen_size;
         let show_legend = self.chart_prop.show_legend;
         let legend_size = (screen_size.0 * 0.30).ceil();
-        screen_size.0 = if show_legend == false { screen_size.0 } else { screen_size.0 + legend_size };
+        screen_size.0 = if show_legend == false {
+            screen_size.0
+        } else {
+            screen_size.0 + legend_size
+        };
 
         let mut h_scale = screen_size.1 / screen_size.0;
         let mut v_scale = screen_size.0 / screen_size.1;
@@ -49,7 +52,7 @@ impl PieChart {
         }
 
         // Scaling used dependant use of a legend
-        let scalings: (f64, f64, f64, f64 ,f64, f64);
+        let scalings: (f64, f64, f64, f64, f64, f64);
         if show_legend == true {
             scalings = get_legend_scale(screen_size, legend_size);
         } else {
@@ -92,7 +95,7 @@ impl PieChart {
             let text_radius = 0.5 * radius_scaling;
 
             use std::f64::consts::PI;
-            let mut cur_rad: f64 = - PI / 2.0;
+            let mut cur_rad: f64 = -PI / 2.0;
             let mut prev_rad: f64;
 
             cr.save();
@@ -124,14 +127,21 @@ impl PieChart {
                 cr.arc(0.0, 0.0, text_radius, prev_rad, cur_rad - proportion * PI);
                 let point = cr.get_current_point();
                 // point.0 will be between -0.5 and 0.5
-                cr.rel_move_to(text_width * (point.0 - 0.5) ,text_height / 2.0);
+                cr.rel_move_to(text_width * (point.0 - 0.5), text_height / 2.0);
                 cr.show_text(percent_str);
                 cr.new_path();
             }
             cr.restore();
 
             // Chart Title
-            draw_title(cr, _left_bound, _upper_bound, h_scale, v_scale, &chart_title);
+            draw_title(
+                cr,
+                _left_bound,
+                _upper_bound,
+                h_scale,
+                v_scale,
+                &chart_title,
+            );
 
             // Draw legend if chosen
             if show_legend == true {
@@ -141,7 +151,9 @@ impl PieChart {
             Inhibit(false)
         });
     }
-    pub(in chart_builder) fn get_chart_prop(&self) -> ChartProp { self.chart_prop.clone() }
+    pub(in chart_builder) fn get_chart_prop(&self) -> ChartProp {
+        self.chart_prop.clone()
+    }
 }
 
 impl Chart for PieChart {

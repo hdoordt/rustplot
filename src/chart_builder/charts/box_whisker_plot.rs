@@ -1,6 +1,5 @@
 //!
 
-
 use chart_builder::charts::*;
 
 /// Structure used for storing chart related data and the drawing of a Box and Whisker Plot.
@@ -24,16 +23,22 @@ impl BoxWhiskerPlot {
     ///
     /// ```new_data``` is the number data for which statistics are generated to create a box plot.
     /// Each inner vector represents a new box and whisker plot named by the same index element in new_data_labels.
-    pub fn new(chart_title: String, new_data_labels: Vec<String>, new_data: Vec<Vec<f64>>) -> BoxWhiskerPlot {
+    pub fn new(
+        chart_title: String,
+        new_data_labels: Vec<String>,
+        new_data: Vec<Vec<f64>>,
+    ) -> BoxWhiskerPlot {
         let x_axis_bounds = (0.0, 0.0);
         let x_axis_scale = 1.0 / (new_data_labels.len() as f64);
         let y_axis_props = calc_axis_props(&new_data, true, false); // take bar
         let y_axis_bounds = y_axis_props.0;
         let y_axis_scale = y_axis_props.1;
 
-        let axis_type: AxisType =
-            if y_axis_bounds.0 < 0.0 && y_axis_bounds.1 > 0.0 { AxisType::DoubleVertical }
-            else { AxisType::Single };
+        let axis_type: AxisType = if y_axis_bounds.0 < 0.0 && y_axis_bounds.1 > 0.0 {
+            AxisType::DoubleVertical
+        } else {
+            AxisType::Single
+        };
 
         BoxWhiskerPlot {
             data_labels: new_data_labels,
@@ -42,7 +47,7 @@ impl BoxWhiskerPlot {
             axis_prop: AxisProp::new(x_axis_bounds, y_axis_bounds, x_axis_scale, y_axis_scale),
         }
     }
-    pub(in chart_builder) fn draw_chart(&self, drawing_area: &DrawingArea) {
+    pub fn draw_chart(&self, drawing_area: &DrawingArea) {
         let data_labels = self.data_labels.clone();
         let data = self.data.clone();
 
@@ -69,7 +74,7 @@ impl BoxWhiskerPlot {
             h_scale = 1.0;
         }
 
-        let scalings: (f64, f64, f64, f64 ,f64, f64);
+        let scalings: (f64, f64, f64, f64, f64, f64);
         scalings = get_normal_scale();
 
         let _horizontal_scaling = scalings.0;
@@ -90,7 +95,7 @@ impl BoxWhiskerPlot {
 
         for i in 0..data.len() {
             // Sort data for determing percentile
-            let mut sorted_data =  data[i].clone();
+            let mut sorted_data = data[i].clone();
             sorted_data.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
 
             // Lower quartile is the (n + 1) ÷ 4 th value.
@@ -109,15 +114,23 @@ impl BoxWhiskerPlot {
 
             // store all outlier values
             let mut temp = sorted_data.clone();
-            temp.retain(|&i|i < lower_limit || i > upper_limit);
+            temp.retain(|&i| i < lower_limit || i > upper_limit);
             outliers.push(temp);
 
             // remove outliers vaules from main data
-            sorted_data.retain(|&i|i > lower_limit && i < upper_limit);
+            sorted_data.retain(|&i| i > lower_limit && i < upper_limit);
 
             // get min and max from remaining data
-            min.push(sorted_data.iter().fold(-0./0., |cur_min, &x| cur_min.min(x)));
-            max.push(sorted_data.iter().fold(0./0., |cur_max, &x| cur_max.max(x)));
+            min.push(
+                sorted_data
+                    .iter()
+                    .fold(-0. / 0., |cur_min, &x| cur_min.min(x)),
+            );
+            max.push(
+                sorted_data
+                    .iter()
+                    .fold(0. / 0., |cur_max, &x| cur_max.max(x)),
+            );
         }
 
         drawing_area.connect_draw(move |_, cr| {
@@ -139,12 +152,18 @@ impl BoxWhiskerPlot {
 
             use std::f64::consts::PI;
 
-            let intercept = calc_x_intercept(calc_zero_intercept(y_axis_min, y_axis_max), _vertical_scaling, _lower_bound, _upper_bound);
+            let intercept = calc_x_intercept(
+                calc_zero_intercept(y_axis_min, y_axis_max),
+                _vertical_scaling,
+                _lower_bound,
+                _upper_bound,
+            );
             let x_delimiter_interval: f64 = _horizontal_scaling * x_axis_scale;
             let bar_width = 0.6 / (data.len() as f64);
 
             for i in 0..data.len() {
-                let x = _left_bound - (x_delimiter_interval / 2.0) + x_delimiter_interval * ((i + 1) as f64);
+                let x = _left_bound - (x_delimiter_interval / 2.0)
+                    + x_delimiter_interval * ((i + 1) as f64);
 
                 set_nth_colour(cr, i);
 
@@ -152,7 +171,9 @@ impl BoxWhiskerPlot {
                 cr.set_line_width(0.0025);
                 for j in 0..outliers[i].len() {
                     let y_val = outliers[i][j];
-                    let y = _lower_bound - (get_percentage_in_bounds(y_val, y_axis_min, y_axis_max) * _vertical_scaling);
+                    let y = _lower_bound
+                        - (get_percentage_in_bounds(y_val, y_axis_min, y_axis_max)
+                            * _vertical_scaling);
                     // draw mark (round) at (x,y)
                     cr.save();
                     // Moving drawing origin to (x,y)
@@ -170,9 +191,15 @@ impl BoxWhiskerPlot {
                 // draw lq to uq block
                 cr.rectangle(
                     x - (bar_width / 2.0) * _horizontal_scaling,
-                    _lower_bound - (get_percentage_in_bounds(lq[i], y_axis_min, y_axis_max) * _vertical_scaling),
+                    _lower_bound
+                        - (get_percentage_in_bounds(lq[i], y_axis_min, y_axis_max)
+                            * _vertical_scaling),
                     bar_width * _horizontal_scaling,
-                    _lower_bound - (get_percentage_in_bounds(iqr[i], y_axis_min, y_axis_max) * _vertical_scaling) - intercept);
+                    _lower_bound
+                        - (get_percentage_in_bounds(iqr[i], y_axis_min, y_axis_max)
+                            * _vertical_scaling)
+                        - intercept,
+                );
                 // preserve used to keep shape to draw outline
                 cr.fill_preserve();
                 cr.stroke_preserve();
@@ -180,42 +207,114 @@ impl BoxWhiskerPlot {
                 cr.set_source_rgb(0.0, 0.0, 0.0);
 
                 // median line
-                cr.move_to(x - bar_width * _horizontal_scaling / 2.0, _lower_bound - (get_percentage_in_bounds(med[i], y_axis_min, y_axis_max) * _vertical_scaling));
-                cr.line_to(x + bar_width * _horizontal_scaling / 2.0, _lower_bound - (get_percentage_in_bounds(med[i], y_axis_min, y_axis_max) * _vertical_scaling));
+                cr.move_to(
+                    x - bar_width * _horizontal_scaling / 2.0,
+                    _lower_bound
+                        - (get_percentage_in_bounds(med[i], y_axis_min, y_axis_max)
+                            * _vertical_scaling),
+                );
+                cr.line_to(
+                    x + bar_width * _horizontal_scaling / 2.0,
+                    _lower_bound
+                        - (get_percentage_in_bounds(med[i], y_axis_min, y_axis_max)
+                            * _vertical_scaling),
+                );
 
                 // line from lq to min
-                cr.move_to(x, _lower_bound - (get_percentage_in_bounds(lq[i], y_axis_min, y_axis_max) * _vertical_scaling));
-                cr.line_to(x, _lower_bound - (get_percentage_in_bounds(min[i], y_axis_min, y_axis_max) * _vertical_scaling));
+                cr.move_to(
+                    x,
+                    _lower_bound
+                        - (get_percentage_in_bounds(lq[i], y_axis_min, y_axis_max)
+                            * _vertical_scaling),
+                );
+                cr.line_to(
+                    x,
+                    _lower_bound
+                        - (get_percentage_in_bounds(min[i], y_axis_min, y_axis_max)
+                            * _vertical_scaling),
+                );
                 // end of min line
-                cr.move_to(x - bar_width * _horizontal_scaling * 0.2, _lower_bound - (get_percentage_in_bounds(min[i], y_axis_min, y_axis_max) * _vertical_scaling));
-                cr.line_to(x + bar_width * _horizontal_scaling * 0.2, _lower_bound - (get_percentage_in_bounds(min[i], y_axis_min, y_axis_max) * _vertical_scaling));
+                cr.move_to(
+                    x - bar_width * _horizontal_scaling * 0.2,
+                    _lower_bound
+                        - (get_percentage_in_bounds(min[i], y_axis_min, y_axis_max)
+                            * _vertical_scaling),
+                );
+                cr.line_to(
+                    x + bar_width * _horizontal_scaling * 0.2,
+                    _lower_bound
+                        - (get_percentage_in_bounds(min[i], y_axis_min, y_axis_max)
+                            * _vertical_scaling),
+                );
 
                 // line from uq to max
-                cr.move_to(x, _lower_bound - (get_percentage_in_bounds(uq[i], y_axis_min, y_axis_max) * _vertical_scaling));
-                cr.line_to(x, _lower_bound - (get_percentage_in_bounds(max[i], y_axis_min, y_axis_max) * _vertical_scaling));
+                cr.move_to(
+                    x,
+                    _lower_bound
+                        - (get_percentage_in_bounds(uq[i], y_axis_min, y_axis_max)
+                            * _vertical_scaling),
+                );
+                cr.line_to(
+                    x,
+                    _lower_bound
+                        - (get_percentage_in_bounds(max[i], y_axis_min, y_axis_max)
+                            * _vertical_scaling),
+                );
                 // end of max line
-                cr.move_to(x - bar_width * _horizontal_scaling * 0.2, _lower_bound - (get_percentage_in_bounds(max[i], y_axis_min, y_axis_max) * _vertical_scaling));
-                cr.line_to(x + bar_width * _horizontal_scaling * 0.2, _lower_bound - (get_percentage_in_bounds(max[i], y_axis_min, y_axis_max) * _vertical_scaling));
+                cr.move_to(
+                    x - bar_width * _horizontal_scaling * 0.2,
+                    _lower_bound
+                        - (get_percentage_in_bounds(max[i], y_axis_min, y_axis_max)
+                            * _vertical_scaling),
+                );
+                cr.line_to(
+                    x + bar_width * _horizontal_scaling * 0.2,
+                    _lower_bound
+                        - (get_percentage_in_bounds(max[i], y_axis_min, y_axis_max)
+                            * _vertical_scaling),
+                );
 
                 cr.stroke();
             }
 
             // Chart Title
-            draw_title(cr, _left_bound, _upper_bound, h_scale, v_scale, &chart_title);
+            draw_title(
+                cr,
+                _left_bound,
+                _upper_bound,
+                h_scale,
+                v_scale,
+                &chart_title,
+            );
 
             // Draw Axis
-            draw_x_axis_cat(cr, scalings,
-                &data_labels, x_axis_scale, calc_zero_intercept(y_axis_min, y_axis_max), &x_axis_title,
+            draw_x_axis_cat(
+                cr,
+                scalings,
+                &data_labels,
+                x_axis_scale,
+                calc_zero_intercept(y_axis_min, y_axis_max),
+                &x_axis_title,
                 screen_size,
-                false);
-            draw_y_axis_con(cr, scalings,
-                y_axis_min, y_axis_max, y_axis_scale, 0.0, &y_axis_title,
-                screen_size);
+                false,
+            );
+            draw_y_axis_con(
+                cr,
+                scalings,
+                y_axis_min,
+                y_axis_max,
+                y_axis_scale,
+                0.0,
+                &y_axis_title,
+                screen_size,
+            );
 
             Inhibit(false)
         });
     }
-    pub(in chart_builder) fn get_chart_prop(&self) -> ChartProp { self.chart_prop.clone() }
+    pub(in chart_builder) fn get_chart_prop(&self) -> ChartProp {
+        self.chart_prop.clone()
+    }
 }
 
 impl Chart for BoxWhiskerPlot {

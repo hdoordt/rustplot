@@ -1,6 +1,5 @@
 //!
 
-
 use chart_builder::charts::*;
 
 /// Structure used for storing chart related data and the drawing of an Histogram.
@@ -27,9 +26,11 @@ impl Histogram {
         let y_axis_bounds = (0.0, 0.0);
         let y_axis_scale = 0.0;
 
-        let axis_type: AxisType =
-            if x_axis_bounds.0 < 0.0 && x_axis_bounds.1 > 0.0 { AxisType::DoubleHorizontal }
-            else { AxisType::Single };
+        let axis_type: AxisType = if x_axis_bounds.0 < 0.0 && x_axis_bounds.1 > 0.0 {
+            AxisType::DoubleHorizontal
+        } else {
+            AxisType::Single
+        };
 
         Histogram {
             data: new_data,
@@ -37,7 +38,7 @@ impl Histogram {
             axis_prop: AxisProp::new(x_axis_bounds, y_axis_bounds, x_axis_scale, y_axis_scale),
         }
     }
-    pub(in chart_builder) fn draw_chart(&self, drawing_area: &DrawingArea) {
+    pub fn draw_chart(&self, drawing_area: &DrawingArea) {
         let data = self.data.clone();
 
         let chart_title = self.chart_prop.chart_title.clone();
@@ -53,7 +54,11 @@ impl Histogram {
         let mut screen_size = self.chart_prop.screen_size;
         let show_legend = self.chart_prop.show_legend;
         let legend_size = (screen_size.0 * 0.30).ceil();
-        screen_size.0 = if show_legend == false { screen_size.0 } else { screen_size.0 + legend_size };
+        screen_size.0 = if show_legend == false {
+            screen_size.0
+        } else {
+            screen_size.0 + legend_size
+        };
 
         let mut h_scale = screen_size.1 / screen_size.0;
         let mut v_scale = screen_size.0 / screen_size.1;
@@ -66,7 +71,7 @@ impl Histogram {
         }
 
         // Scaling used dependant use of a legend
-        let scalings: (f64, f64, f64, f64 ,f64, f64);
+        let scalings: (f64, f64, f64, f64, f64, f64);
         scalings = get_normal_scale();
 
         let _horizontal_scaling = scalings.0;
@@ -79,7 +84,7 @@ impl Histogram {
         // create an empty vector with counters starting at zero,
         // with size of the number of ranges used in histogram.
         let mut frequencies: Vec<f64> = Vec::new();
-        let num_ranges = (1.0/x_axis_scale).trunc() as usize;
+        let num_ranges = (1.0 / x_axis_scale).trunc() as usize;
         for _i in 0..num_ranges {
             frequencies.push(0.0);
         }
@@ -123,7 +128,6 @@ impl Histogram {
 
             set_defaults(cr, screen_size);
 
-
             // Drawing Histogram Components
             let x_delimiter_interval: f64 = _horizontal_scaling * x_axis_scale;
             let bar_width = x_delimiter_interval;
@@ -139,7 +143,8 @@ impl Histogram {
                     _left_bound + x_delimiter_interval * (i as f64),
                     _lower_bound,
                     bar_width,
-                    - get_percentage_in_bounds(val, y_axis_min, y_axis_max) * _vertical_scaling);
+                    -get_percentage_in_bounds(val, y_axis_min, y_axis_max) * _vertical_scaling,
+                );
                 cr.fill_preserve();
                 cr.stroke_preserve();
 
@@ -149,20 +154,43 @@ impl Histogram {
             }
 
             // Chart Title
-            draw_title(cr, _left_bound, _upper_bound, h_scale, v_scale, &chart_title);
+            draw_title(
+                cr,
+                _left_bound,
+                _upper_bound,
+                h_scale,
+                v_scale,
+                &chart_title,
+            );
 
             // Draw Axis
-            draw_x_axis_con(cr, scalings,
-                x_axis_min, x_axis_max, x_axis_scale, 0.0, &x_axis_title,
-                screen_size);
-            draw_y_axis_con(cr, scalings,
-                y_axis_min, y_axis_max, y_axis_scale, calc_zero_intercept(x_axis_min, x_axis_max), &y_axis_title,
-                screen_size);
+            draw_x_axis_con(
+                cr,
+                scalings,
+                x_axis_min,
+                x_axis_max,
+                x_axis_scale,
+                0.0,
+                &x_axis_title,
+                screen_size,
+            );
+            draw_y_axis_con(
+                cr,
+                scalings,
+                y_axis_min,
+                y_axis_max,
+                y_axis_scale,
+                calc_zero_intercept(x_axis_min, x_axis_max),
+                &y_axis_title,
+                screen_size,
+            );
 
             Inhibit(false)
         });
     }
-    pub(in chart_builder) fn get_chart_prop(&self) -> ChartProp { self.chart_prop.clone() }
+    pub(in chart_builder) fn get_chart_prop(&self) -> ChartProp {
+        self.chart_prop.clone()
+    }
 }
 
 impl Chart for Histogram {

@@ -54,9 +54,9 @@ use self::gtk::prelude::*;
 use self::gtk::DrawingArea;
 
 use self::cairo::Context;
-use self::cairo::{FontSlant, FontWeight};
 #[allow(unused_imports)]
 use self::cairo::Matrix;
+use self::cairo::{FontSlant, FontWeight};
 
 /*
  * Defining general Chart component structures and thier constructors.
@@ -92,18 +92,18 @@ mod axis_drawer;
  */
 
 mod charts;
-pub use self::charts::histogram::Histogram;
 pub use self::charts::box_whisker_plot::BoxWhiskerPlot;
+pub use self::charts::histogram::Histogram;
 // pub use self::charts::tree_map::TreeMap;
-pub use self::charts::doughnut_chart::DoughnutChart;
-pub use self::charts::pie_chart::PieChart;
-pub use self::charts::vertical_bar_chart::VerticalBarChart;
-pub use self::charts::radar_chart::RadarChart;
 pub use self::charts::area_chart::AreaChart;
-pub use self::charts::stacked_area_chart::StackedAreaChart;
-pub use self::charts::line_chart::LineChart;
-pub use self::charts::xy_scatter_plot::XYScatterPlot;
 pub use self::charts::bubble_chart::BubbleChart;
+pub use self::charts::doughnut_chart::DoughnutChart;
+pub use self::charts::line_chart::LineChart;
+pub use self::charts::pie_chart::PieChart;
+pub use self::charts::radar_chart::RadarChart;
+pub use self::charts::stacked_area_chart::StackedAreaChart;
+pub use self::charts::vertical_bar_chart::VerticalBarChart;
+pub use self::charts::xy_scatter_plot::XYScatterPlot;
 
 /*
  * Helper functions
@@ -117,12 +117,12 @@ pub(in chart_builder) fn get_percentage_in_bounds(value: f64, min: f64, max: f64
  * Public helper functions
  */
 
- /// Removes possible outliers from a Vector of numbers.
- ///
- /// ```data``` is a ```Vec<f64>``` for which the possible outliers will be removed.
+/// Removes possible outliers from a Vector of numbers.
+///
+/// ```data``` is a ```Vec<f64>``` for which the possible outliers will be removed.
 pub fn remove_outliers(data: &Vec<f64>) -> Vec<f64> {
     // Sort data for determing percentile
-    let mut sorted_data =  data.clone();
+    let mut sorted_data = data.clone();
     sorted_data.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
 
     use chart_builder::axis_prop::percentile;
@@ -139,11 +139,10 @@ pub fn remove_outliers(data: &Vec<f64>) -> Vec<f64> {
     let upper_limit = uq + iqr * 1.5;
 
     // remove outliers vaules from data
-    sorted_data.retain(|&i|i >= lower_limit && i <= upper_limit);
+    sorted_data.retain(|&i| i >= lower_limit && i <= upper_limit);
 
     sorted_data
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -162,20 +161,20 @@ mod tests {
     #[test]
     fn remove_outliers_tests() {
         // No outlier
-        let vec_1: Vec<f64> = vec![1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0];
-        let result_1 = vec![1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0];
+        let vec_1: Vec<f64> = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
+        let result_1 = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
         let outlier_res_1 = remove_outliers(&vec_1);
         assert_eq!(outlier_res_1, result_1);
 
         // Outlier outside upper limit
-        let vec_2: Vec<f64> = vec![1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,40.0];
-        let result_2 = vec![1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0];
+        let vec_2: Vec<f64> = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 40.0];
+        let result_2 = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
         let outlier_res_2 = remove_outliers(&vec_2);
         assert_eq!(outlier_res_2, result_2);
 
         // Outlier outside lower limit
-        let vec_3: Vec<f64> = vec![1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,-40.0];
-        let result_3= vec![1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0];
+        let vec_3: Vec<f64> = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, -40.0];
+        let result_3 = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
         let outlier_res_3 = remove_outliers(&vec_3);
         assert_eq!(outlier_res_3, result_3);
     }

@@ -1,4 +1,3 @@
-
 // enum used for determing window size dependent on data provided
 #[derive(Clone)]
 pub(in chart_builder) enum AxisType {

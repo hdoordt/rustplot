@@ -1,6 +1,5 @@
 //!
 
-
 use chart_builder::charts::*;
 
 /// Structure used for storing chart related data and the drawing of an Radar Chart.
@@ -21,7 +20,11 @@ impl RadarChart {
     /// ```new_data_labels``` specifies the labels placed on each point of the chart (each string is a point).
     ///
     /// ```new_data``` is the number data quanities for each point of the chart corresponding to the labels with the same index in new_data_labels.
-    pub fn new(chart_title: String, new_data_labels: Vec<String>, new_data: Vec<Vec<f64>>) -> RadarChart {
+    pub fn new(
+        chart_title: String,
+        new_data_labels: Vec<String>,
+        new_data: Vec<Vec<f64>>,
+    ) -> RadarChart {
         let axis_type: AxisType = AxisType::NoAxis;
 
         RadarChart {
@@ -30,7 +33,7 @@ impl RadarChart {
             chart_prop: ChartProp::new(chart_title, &axis_type),
         }
     }
-    pub(in chart_builder) fn draw_chart(&self, drawing_area: &DrawingArea) {
+    pub fn draw_chart(&self, drawing_area: &DrawingArea) {
         let data_labels = self.data_labels.clone();
         let data = self.data.clone();
         let legend_values = self.chart_prop.legend_values.clone();
@@ -40,7 +43,11 @@ impl RadarChart {
         let mut screen_size = self.chart_prop.screen_size;
         let show_legend = self.chart_prop.show_legend;
         let legend_size = (screen_size.0 * 0.30).ceil();
-        screen_size.0 = if show_legend == false { screen_size.0 } else { screen_size.0 + legend_size };
+        screen_size.0 = if show_legend == false {
+            screen_size.0
+        } else {
+            screen_size.0 + legend_size
+        };
 
         let mut h_scale = screen_size.1 / screen_size.0;
         let mut v_scale = screen_size.0 / screen_size.1;
@@ -53,7 +60,7 @@ impl RadarChart {
         }
 
         // Scaling used dependant use of a legend
-        let scalings: (f64, f64, f64, f64 ,f64, f64);
+        let scalings: (f64, f64, f64, f64, f64, f64);
         if show_legend == true {
             scalings = get_legend_scale(screen_size, legend_size);
         } else {
@@ -100,7 +107,7 @@ impl RadarChart {
             cr.scale(h_scale, v_scale);
             cr.set_line_cap(cairo::LineCap::Round);
 
-            let num_delimiters = ((1.0/outline_scale).trunc() as usize) + 1;
+            let num_delimiters = ((1.0 / outline_scale).trunc() as usize) + 1;
 
             cr.set_line_width(0.0015);
             cr.set_source_rgba(0.0, 0.0, 0.0, 0.5);
@@ -111,7 +118,13 @@ impl RadarChart {
                 shape_points.push(Vec::new());
                 for i in 0..data_labels.len() {
                     let radians = (i as f64) / (data_labels.len() as f64) * 2.0 * PI - PI / 2.0;
-                    cr.arc(0.0, 0.0, max_radius - (j as f64) * outline_scale * max_radius, 0.0, radians);
+                    cr.arc(
+                        0.0,
+                        0.0,
+                        max_radius - (j as f64) * outline_scale * max_radius,
+                        0.0,
+                        radians,
+                    );
                     let point = cr.get_current_point();
                     shape_points[j].push(point);
                 }
@@ -183,7 +196,8 @@ impl RadarChart {
 
                 for i in 0..data_labels.len() {
                     let val = data[j][i];
-                    let val_radius = get_percentage_in_bounds(val, outline_min, outline_max) * max_radius;
+                    let val_radius =
+                        get_percentage_in_bounds(val, outline_min, outline_max) * max_radius;
                     let radians = (i as f64) / (data_labels.len() as f64) * 2.0 * PI - PI / 2.0;
                     cr.arc(0.0, 0.0, val_radius, 0.0, radians);
                     let point = cr.get_current_point();
@@ -213,7 +227,11 @@ impl RadarChart {
             cr.set_source_rgb(0.0, 0.0, 0.0);
             cr.set_font_size(0.016);
             let dps: usize;
-            if outline_max >= 100.0 || outline_min <= -100.0 { dps = 0; } else { dps = 2; }
+            if outline_max >= 100.0 || outline_min <= -100.0 {
+                dps = 0;
+            } else {
+                dps = 2;
+            }
             for j in 0..num_delimiters {
                 let num = outline_max - ((outline_max - outline_min) * outline_scale * (j as f64));
                 let num_string = format!("{:.*}", dps, num).to_string();
@@ -224,14 +242,24 @@ impl RadarChart {
                 let x = shape_points[j][0].0;
                 let y = shape_points[j][0].1;
 
-                cr.move_to(x - text_width - 0.012 * _horizontal_scaling, y + text_height * 0.5);
+                cr.move_to(
+                    x - text_width - 0.012 * _horizontal_scaling,
+                    y + text_height * 0.5,
+                );
                 cr.show_text(num_str);
             }
 
             cr.restore();
 
             // Chart Title
-            draw_title(cr, _left_bound, _upper_bound, h_scale, v_scale, &chart_title);
+            draw_title(
+                cr,
+                _left_bound,
+                _upper_bound,
+                h_scale,
+                v_scale,
+                &chart_title,
+            );
 
             // Draw legend if chosen
             if show_legend == true {
@@ -241,7 +269,9 @@ impl RadarChart {
             Inhibit(false)
         });
     }
-    pub(in chart_builder) fn get_chart_prop(&self) -> ChartProp { self.chart_prop.clone() }
+    pub(in chart_builder) fn get_chart_prop(&self) -> ChartProp {
+        self.chart_prop.clone()
+    }
 }
 
 impl Chart for RadarChart {

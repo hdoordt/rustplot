@@ -1,6 +1,5 @@
 //!
 
-
 use chart_builder::charts::*;
 
 /// Structure used for storing chart related data and the drawing of a Bubble Chart.
@@ -25,7 +24,12 @@ impl BubbleChart {
     /// ```new_data_y``` is the number data placed on the y-axis of the chart, specifying vertical positions of bubbles, with indexes corresponding to the same index in new_data_x.
     ///
     /// ```new_data_magnitude``` is the number data used to scale size of bubble proportionally, where indexes correspond to the same index in new_data_x and new_data_y.
-    pub fn new(chart_title: String, new_data_x: Vec<Vec<f64>>, new_data_y: Vec<Vec<f64>>, new_data_magnitude: Vec<Vec<f64>>) -> BubbleChart {
+    pub fn new(
+        chart_title: String,
+        new_data_x: Vec<Vec<f64>>,
+        new_data_y: Vec<Vec<f64>>,
+        new_data_magnitude: Vec<Vec<f64>>,
+    ) -> BubbleChart {
         let x_axis_props = calc_axis_props(&new_data_x, false, true);
         let x_axis_bounds = x_axis_props.0;
         let x_axis_scale = x_axis_props.1;
@@ -33,11 +37,17 @@ impl BubbleChart {
         let y_axis_bounds = y_axis_props.0;
         let y_axis_scale = y_axis_props.1;
 
-        let axis_type: AxisType =
-            if (x_axis_bounds.0 < 0.0 && x_axis_bounds.1 > 0.0) && (y_axis_bounds.0 < 0.0 && y_axis_bounds.1 > 0.0) { AxisType::Full }
-            else if x_axis_bounds.0 < 0.0 && x_axis_bounds.1 > 0.0 { AxisType::DoubleHorizontal }
-            else if y_axis_bounds.0 < 0.0 && y_axis_bounds.1 > 0.0 { AxisType::DoubleVertical }
-            else { AxisType::Single };
+        let axis_type: AxisType = if (x_axis_bounds.0 < 0.0 && x_axis_bounds.1 > 0.0)
+            && (y_axis_bounds.0 < 0.0 && y_axis_bounds.1 > 0.0)
+        {
+            AxisType::Full
+        } else if x_axis_bounds.0 < 0.0 && x_axis_bounds.1 > 0.0 {
+            AxisType::DoubleHorizontal
+        } else if y_axis_bounds.0 < 0.0 && y_axis_bounds.1 > 0.0 {
+            AxisType::DoubleVertical
+        } else {
+            AxisType::Single
+        };
 
         BubbleChart {
             data_x: new_data_x,
@@ -47,7 +57,7 @@ impl BubbleChart {
             axis_prop: AxisProp::new(x_axis_bounds, y_axis_bounds, x_axis_scale, y_axis_scale),
         }
     }
-    pub(in chart_builder) fn draw_chart(&self, drawing_area: &DrawingArea) {
+    pub fn draw_chart(&self, drawing_area: &DrawingArea) {
         let data_x = self.data_x.clone();
         let data_y = self.data_y.clone();
         let data_mag = self.data_magnitude.clone();
@@ -70,7 +80,11 @@ impl BubbleChart {
         let mut screen_size = self.chart_prop.screen_size;
         let show_legend = self.chart_prop.show_legend;
         let legend_size = (screen_size.0 * 0.30).ceil();
-        screen_size.0 = if show_legend == false { screen_size.0 } else { screen_size.0 + legend_size };
+        screen_size.0 = if show_legend == false {
+            screen_size.0
+        } else {
+            screen_size.0 + legend_size
+        };
 
         let mut h_scale = screen_size.1 / screen_size.0;
         let mut v_scale = screen_size.0 / screen_size.1;
@@ -83,7 +97,7 @@ impl BubbleChart {
         }
 
         // Scaling used dependant use of a legend
-        let scalings: (f64, f64, f64, f64 ,f64, f64);
+        let scalings: (f64, f64, f64, f64, f64, f64);
         if show_legend == true {
             scalings = get_legend_scale(screen_size, legend_size);
         } else {
@@ -104,8 +118,12 @@ impl BubbleChart {
 
             // Drawing Bubble Chart Components
 
-            let min_mag: f64 = data_mag.iter().fold(-0./0., |vec_cur_min, ref x| vec_cur_min.min(x.iter().fold(-0./0., |cur_min, &x| cur_min.min(x))));
-            let max_mag: f64 = data_mag.iter().fold(0./0., |vec_cur_max, ref x| vec_cur_max.max(x.iter().fold(0./0., |cur_max, &x| cur_max.max(x))));
+            let min_mag: f64 = data_mag.iter().fold(-0. / 0., |vec_cur_min, ref x| {
+                vec_cur_min.min(x.iter().fold(-0. / 0., |cur_min, &x| cur_min.min(x)))
+            });
+            let max_mag: f64 = data_mag.iter().fold(0. / 0., |vec_cur_max, ref x| {
+                vec_cur_max.max(x.iter().fold(0. / 0., |cur_max, &x| cur_max.max(x)))
+            });
 
             // radius scaling (determining size) always goes with the smaller scaling so guarnteed to fit into screen.
             let radius_scaling;
@@ -123,11 +141,17 @@ impl BubbleChart {
                     let x_val = data_x[j][i];
                     let y_val = data_y[j][i];
                     let mag_val = data_mag[j][i];
-                    let x = _left_bound + (get_percentage_in_bounds(x_val, x_axis_min, x_axis_max) * _horizontal_scaling);
-                    let y = _lower_bound - (get_percentage_in_bounds(y_val, y_axis_min, y_axis_max) * _vertical_scaling);
+                    let x = _left_bound
+                        + (get_percentage_in_bounds(x_val, x_axis_min, x_axis_max)
+                            * _horizontal_scaling);
+                    let y = _lower_bound
+                        - (get_percentage_in_bounds(y_val, y_axis_min, y_axis_max)
+                            * _vertical_scaling);
 
                     // draw bubble at (x,y)
-                    let bubble_radius = ((mag_val - min_mag) / (max_mag - min_mag) * 0.1 + 0.01) * radius_scaling * 1.1;
+                    let bubble_radius = ((mag_val - min_mag) / (max_mag - min_mag) * 0.1 + 0.01)
+                        * radius_scaling
+                        * 1.1;
 
                     cr.save();
                     // Moving drawing origin to (x,y)
@@ -139,20 +163,40 @@ impl BubbleChart {
                     cr.fill();
                     cr.stroke();
                     cr.restore();
-
                 }
             }
 
             // Chart Title
-            draw_title(cr, _left_bound, _upper_bound, h_scale, v_scale, &chart_title);
+            draw_title(
+                cr,
+                _left_bound,
+                _upper_bound,
+                h_scale,
+                v_scale,
+                &chart_title,
+            );
 
             // Draw Axis
-            draw_x_axis_con(cr, scalings,
-                x_axis_min, x_axis_max, x_axis_scale, calc_zero_intercept(y_axis_min, y_axis_max), &x_axis_title,
-                screen_size);
-            draw_y_axis_con(cr, scalings,
-                y_axis_min, y_axis_max, y_axis_scale, calc_zero_intercept(x_axis_min, x_axis_max), &y_axis_title,
-                screen_size);
+            draw_x_axis_con(
+                cr,
+                scalings,
+                x_axis_min,
+                x_axis_max,
+                x_axis_scale,
+                calc_zero_intercept(y_axis_min, y_axis_max),
+                &x_axis_title,
+                screen_size,
+            );
+            draw_y_axis_con(
+                cr,
+                scalings,
+                y_axis_min,
+                y_axis_max,
+                y_axis_scale,
+                calc_zero_intercept(x_axis_min, x_axis_max),
+                &y_axis_title,
+                screen_size,
+            );
 
             // Draw legend if chosen
             if show_legend == true {
@@ -162,7 +206,9 @@ impl BubbleChart {
             Inhibit(false)
         });
     }
-    pub(in chart_builder) fn get_chart_prop(&self) -> ChartProp { self.chart_prop.clone() }
+    pub(in chart_builder) fn get_chart_prop(&self) -> ChartProp {
+        self.chart_prop.clone()
+    }
 }
 
 impl Chart for BubbleChart {

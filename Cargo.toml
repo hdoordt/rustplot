@@ -14,4 +14,4 @@ csv = "0.15.0"
 regex = "0.2"
 gio = "^0"
 gtk = "^0"
-cairo-rs = { version = "^0", features = ["png"] }
+cairo-rs = { version = "^0.7", features = ["png"] }
